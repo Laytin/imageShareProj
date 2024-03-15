@@ -1,22 +1,34 @@
 package com.laytin.kafkaProjectMain.model;
 
-public class ImageCounter {
+import java.sql.Timestamp;
+
+public class FileCounter {
     private int id;
     private String name;
     private int count;
+    private Timestamp tm;
 
-    public ImageCounter() {
+    public FileCounter() {
     }
 
-    public ImageCounter(String name, int count) {
+    public FileCounter(String name, int count) {
         this.name = name;
         this.count = count;
     }
 
-    public ImageCounter(int id, String name, int count) {
+    public FileCounter(int id, String name, int count, Timestamp tm) {
         this.id = id;
         this.name = name;
         this.count = count;
+        this.tm = tm;
+    }
+
+    public Timestamp getTm() {
+        return tm;
+    }
+
+    public void setTm(Timestamp tm) {
+        this.tm = tm;
     }
 
     public int getId() {
