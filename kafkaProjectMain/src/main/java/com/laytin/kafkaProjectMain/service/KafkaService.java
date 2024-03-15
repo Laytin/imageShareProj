@@ -1,7 +1,7 @@
-package com.laytin.kafkaProjectMain.listener;
+package com.laytin.kafkaProjectMain.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.kafka.requestreply.RequestReplyFuture;
 import org.springframework.kafka.support.SendResult;
@@ -12,16 +12,16 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class KafkaListener {
+public class KafkaService {
     private ReplyingKafkaTemplate<String, Object, Object> template;
-    @Value("${myproject.send-topics}")
-    private String SEND_TOPICS;
+    private ObjectMapper mapper;
     @Autowired
-    public KafkaListener(ReplyingKafkaTemplate<String, Object, Object> template) {
+    public KafkaService(ReplyingKafkaTemplate<String, Object, Object> template, ObjectMapper mapper) {
         this.template = template;
+        this.mapper = mapper;
     }
-    public Object kafkaRequestReply(Object request) throws Exception {
-        ProducerRecord<String, Object> record = new ProducerRecord<>(SEND_TOPICS, request);
+    public Object kafkaRegisterReply(Object request) throws Exception {
+        ProducerRecord<String, Object> record = new ProducerRecord<>("register-topic", mapper.writeValueAsString(request));
         RequestReplyFuture<String, Object, Object> replyFuture = template.sendAndReceive(record);
         SendResult<String, Object> sendResult = replyFuture.getSendFuture().get(10, TimeUnit.SECONDS);
         ConsumerRecord<String, Object> consumerRecord = replyFuture.get(10, TimeUnit.SECONDS);

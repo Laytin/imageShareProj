@@ -1,25 +1,27 @@
 package com.laytin.kafkaProjectMain.dto;
 
+
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public class UploadResponce {
-    public ResponseEntity<HttpEntity> responceType;
-    public String message;
+    private ResponseEntity<HttpStatus> responceType = ResponseEntity.ok(HttpStatus.INTERNAL_SERVER_ERROR);
+    private String message = "Some error during uploading file.";
 
     public UploadResponce() {
     }
 
-    public UploadResponce(ResponseEntity<HttpEntity> responceType, String message) {
+    public UploadResponce(ResponseEntity<HttpStatus> responceType, String message) {
         this.responceType = responceType;
         this.message = message;
     }
 
-    public ResponseEntity<HttpEntity> getResponceType() {
+    public ResponseEntity<HttpStatus> getResponceType() {
         return responceType;
     }
 
-    public void setResponceType(ResponseEntity<HttpEntity> responceType) {
+    public void setResponceType(ResponseEntity<HttpStatus> responceType) {
         this.responceType = responceType;
     }
 
