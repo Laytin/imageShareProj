@@ -2,9 +2,11 @@ package com.laytin.kafkaProjectSelectel.model;
 
 import jakarta.persistence.*;
 
+import java.sql.Timestamp;
+
 @Entity
 @Table(name = "filecounter")
-public class ImageCounter {
+public class FileCounter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -13,19 +15,29 @@ public class ImageCounter {
     private String name;
     @Column(name = "count")
     private int count;
-
-    public ImageCounter() {
+    @Column(name="tm")
+    private Timestamp tm;
+    public FileCounter() {
     }
 
-    public ImageCounter(String name, int count) {
+    public FileCounter(String name, int count) {
         this.name = name;
         this.count = count;
     }
 
-    public ImageCounter(int id, String name, int count) {
+    public FileCounter(int id, String name, int count, Timestamp tm) {
         this.id = id;
         this.name = name;
         this.count = count;
+        this.tm = tm;
+    }
+
+    public Timestamp getTm() {
+        return tm;
+    }
+
+    public void setTm(Timestamp tm) {
+        this.tm = tm;
     }
 
     public int getId() {
