@@ -1,8 +1,13 @@
 package com.laytin.kafkaProjectMain.service;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.HttpMethod;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsResult;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.laytin.kafkaProjectMain.dto.UploadResponce;
 import com.laytin.kafkaProjectMain.model.FileCounter;
@@ -15,10 +20,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-
+import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class FileService {
@@ -54,26 +61,41 @@ public class FileService {
         return responce;
     }
     public String generatePreSignedUrl(String filename) {
-        //TODO: check if file counts is down
         try {
             FileCounter fc = objectMapper.readValue((String)kafkaService.kafkaRequestReply(filename,"get-specific-topic"), FileCounter.class);
-            if(fc==null || fc.getName()==null || fc.getCount()==0)
+            if(fc.getName()==null || fc.getName().equals(""))
                 throw new RuntimeException("File unavaible for downloading");
-            if(fc.getCount()!=-1){
-                fc.setCount(fc.getCount()-1);
-                kafkaService.kafkaRequestReply(objectMapper.writeValueAsString(fc),"set-topic");
-            }
             Calendar cal = Calendar.getInstance();
             cal.setTime(new Date());
             cal.add(Calendar.MINUTE,5);
             String s = s3.generatePresignedUrl("neoksomeshit",filename,cal.getTime(), HttpMethod.GET).toString();
+            return s;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return "error";
     }
     @Scheduled(fixedDelay = 50000)
     public void deleteExpired() {
-        System.out.println("shuduled");
+        try {
+            List<FileCounter> asList = objectMapper.readValue((String)kafkaService.kafkaRequestReply("","get-expired-list-topic"),
+                    new TypeReference<List<FileCounter>>() { });
+            if(asList.isEmpty())
+                return;
+            ArrayList<KeyVersion> keys = new ArrayList<KeyVersion>();
+            asList.forEach(f->{
+                s3.putObject(bukkitName, f.getName(), "Object to delete:" + f.getName());
+                keys.add(new KeyVersion(f.getName()));
+            });
+            DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest(bukkitName)
+                    .withKeys(keys)
+                    .withQuiet(false);
+            DeleteObjectsResult delObjRes = s3.deleteObjects(multiObjectDeleteRequest);
+            } catch (AmazonServiceException e) {
+                e.printStackTrace();
+            } catch (SdkClientException e) {
+                e.printStackTrace();
+            }catch (Exception e) {
+                throw new RuntimeException(e);
+            }
     }
 }

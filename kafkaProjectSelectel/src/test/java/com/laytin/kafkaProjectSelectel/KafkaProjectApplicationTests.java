@@ -1,7 +1,7 @@
 package com.laytin.kafkaProjectSelectel;
 
 import com.laytin.kafkaProjectSelectel.model.FileCounter;
-import com.laytin.kafkaProjectSelectel.service.CounterService;
+import com.laytin.kafkaProjectSelectel.service.FileService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,7 +12,7 @@ import java.util.List;
 @SpringBootTest
 class KafkaProjectApplicationTests {
 	@Autowired
-	private CounterService cs;
+	private FileService cs;
 	@Test
 	void contextLoads() {
 		List<FileCounter> fc =  cs.getExpiredList();

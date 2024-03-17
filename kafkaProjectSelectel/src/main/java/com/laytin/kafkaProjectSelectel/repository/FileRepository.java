@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface FileRepository extends JpaRepository<FileCounter, Integer> {
     Optional<FileCounter> findByName(String imagename);
-    List<FileCounter> findByTmBefore(Timestamp tm);
-    void deleteByTmBefore(Timestamp tm);
+    List<FileCounter> findByTmBeforeOrCountIsLessThan(Timestamp tm, int count);
+    void deleteByTmBeforeOrCountIsLessThan(Timestamp tm, int count);
 }

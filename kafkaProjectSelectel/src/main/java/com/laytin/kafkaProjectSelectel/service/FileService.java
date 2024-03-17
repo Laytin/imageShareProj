@@ -12,15 +12,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class CounterService {
+public class FileService {
     private final FileRepository fileRepository;
     @Autowired
-    public CounterService(FileRepository fileRepository) {
+    public FileService(FileRepository fileRepository) {
         this.fileRepository = fileRepository;
     }
     public FileCounter getImageCounterByName(String filename){
         Optional<FileCounter> fc = fileRepository.findByName(filename);
-        if(!fc.isPresent())
+        if(!fc.isPresent() || fc.get().getCount()==0)
             return new FileCounter();
         FileCounter fc1 = fc.get();
         if(fc1.getCount()==-1)
@@ -40,10 +40,10 @@ public class CounterService {
     }
     public List<FileCounter> getExpiredList(){
         Timestamp tm = Timestamp.valueOf(LocalDateTime.now().minusWeeks(1));
-        List<FileCounter> fc = fileRepository.findByTmBefore(tm);
+        List<FileCounter> fc = fileRepository.findByTmBeforeOrCountIsLessThan(tm,0);
         if(fc.isEmpty())
             return new ArrayList<>();
-        fileRepository.deleteByTmBefore(tm);
+        fileRepository.deleteByTmBeforeOrCountIsLessThan(tm,0);
         return fc;
     }
 }
