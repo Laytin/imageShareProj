@@ -50,13 +50,13 @@ public class FileService {
         try {
             String s = (String)kafkaService.kafkaRequestReply(req,"register-topic");
             if(s.equals("false"))
-                return responce;
+                throw new RuntimeException("DB side: no answer");
             s3.putObject(new PutObjectRequest(bukkitName, fileName, fileObj));
             fileObj.delete();
             responce.setResponceType(ResponseEntity.ok(HttpStatus.OK));
             responce.setMessage("File url: " + domain + "/" + fileName +". Times remaining: " + req.getCount());
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
         return responce;
     }
@@ -67,8 +67,8 @@ public class FileService {
                 throw new RuntimeException("File unavaible for downloading");
             Calendar cal = Calendar.getInstance();
             cal.setTime(new Date());
-            cal.add(Calendar.MINUTE,5);
-            String s = s3.generatePresignedUrl("neoksomeshit",filename,cal.getTime(), HttpMethod.GET).toString();
+            cal.add(Calendar.MINUTE,1);
+            String s = s3.generatePresignedUrl(bukkitName,filename,cal.getTime(), HttpMethod.GET).toString();
             return s;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -90,6 +90,7 @@ public class FileService {
                     .withKeys(keys)
                     .withQuiet(false);
             DeleteObjectsResult delObjRes = s3.deleteObjects(multiObjectDeleteRequest);
+            delObjRes.getDeletedObjects().forEach(f-> System.out.println("Object deleted: " + f.getKey()));
             } catch (AmazonServiceException e) {
                 e.printStackTrace();
             } catch (SdkClientException e) {

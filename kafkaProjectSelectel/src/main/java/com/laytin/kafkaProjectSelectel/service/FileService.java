@@ -3,6 +3,7 @@ package com.laytin.kafkaProjectSelectel.service;
 import com.laytin.kafkaProjectSelectel.model.FileCounter;
 import com.laytin.kafkaProjectSelectel.repository.FileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -13,6 +14,8 @@ import java.util.Optional;
 
 @Service
 public class FileService {
+    @Value("${app.expiredays}")
+    private int expireDays;
     private final FileRepository fileRepository;
     @Autowired
     public FileService(FileRepository fileRepository) {
@@ -24,14 +27,12 @@ public class FileService {
             return new FileCounter();
         FileCounter fc1 = fc.get();
         if(fc1.getCount()==-1)
-            return fc.get();
-        else if(fc1.getCount()==1)
-            fileRepository.delete(fc1);
+            return fc1;
         else{
-            fc.get().setCount(fc.get().getCount()-1);
-            fileRepository.save(fc.get());
+            fc1.setCount(fc1.getCount()-1);
+            fileRepository.save(fc1);
         }
-        return fc.get();
+        return fc1;
     }
     public boolean registerImageCounter(FileCounter img){
         img.setTm(Timestamp.valueOf(LocalDateTime.now()));
@@ -39,7 +40,7 @@ public class FileService {
         return true;
     }
     public List<FileCounter> getExpiredList(){
-        Timestamp tm = Timestamp.valueOf(LocalDateTime.now().minusWeeks(1));
+        Timestamp tm = Timestamp.valueOf(LocalDateTime.now().minusDays(expireDays));
         List<FileCounter> fc = fileRepository.findByTmBeforeOrCountIsLessThan(tm,0);
         if(fc.isEmpty())
             return new ArrayList<>();
