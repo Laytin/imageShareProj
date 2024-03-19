@@ -22,6 +22,7 @@ First part of app controll r2 container, second part - db and donwload count tra
 Usage:
 1) In application.properties change spring.datasource with ur database properties
 2) Here also change cloud.* variables. U can create r2 api key here (see picture). Region should be auto
+   My api key DELETED ATM! Try ur own
    ![image](https://github.com/Laytin/imageShareProj/assets/70861524/f10c0fc4-cca7-4503-b045-ce09db3f06cc)
 
 3) app.domain - in my case localhost:8080 (example)
